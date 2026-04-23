@@ -2,12 +2,13 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>ReplyFast SaaS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReplyFast AI</title>
 
 <style>
 body {
   margin:0;
-  font-family: Inter, Arial;
+  font-family: Arial;
   background: radial-gradient(circle at top, #1a0000, #000);
   color:white;
   display:flex;
@@ -15,11 +16,10 @@ body {
   overflow:hidden;
 }
 
-/* sidebar */
+/* SIDEBAR */
 .sidebar {
-  width:240px;
+  width:260px;
   background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(20px);
   border-right:1px solid rgba(255,255,255,0.08);
   padding:20px;
 }
@@ -46,46 +46,62 @@ body {
   box-shadow:0 0 10px lime;
 }
 
-/* main */
+/* MAIN */
 .main {
   flex:1;
-  padding:30px;
+  padding:20px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
 .card {
+  width:100%;
+  max-width:900px;
+  height:85vh;
   background: rgba(255,255,255,0.05);
   border:1px solid rgba(255,255,255,0.08);
   border-radius:16px;
-  padding:20px;
-  backdrop-filter: blur(20px);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
 
+.header {
+  padding:15px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  font-weight:bold;
+}
+
+/* CHAT */
 .chat {
-  margin-top:20px;
-  height:360px;
+  flex:1;
   overflow:auto;
-  padding:10px;
+  padding:15px;
 }
 
 .msg {
   margin:8px 0;
   padding:10px;
   border-radius:10px;
-  max-width:70%;
+  max-width:75%;
+  word-wrap:break-word;
 }
 
 .user {
   background:#ff2d2d;
-  align-self:flex-end;
+  margin-left:auto;
 }
 
 .ai {
   background:#222;
 }
 
+/* INPUT */
 .inputBox {
   display:flex;
-  margin-top:15px;
+  padding:10px;
+  border-top:1px solid rgba(255,255,255,0.08);
 }
 
 input {
@@ -95,27 +111,62 @@ input {
   border-radius:10px;
   background:#111;
   color:white;
+  font-size:16px;
 }
 
 button {
-  margin-left:10px;
-  padding:12px 18px;
+  margin-left:8px;
+  padding:12px 16px;
   border:none;
   border-radius:10px;
   background:linear-gradient(135deg,#ff2d2d,#ff6b6b);
   color:white;
   cursor:pointer;
-  transition:0.2s;
 }
 
-button:hover {
-  transform:scale(1.05);
+/* 📟 TABLET */
+@media (max-width: 1024px) {
+  .sidebar {
+    width:200px;
+  }
+
+  .card {
+    height:90vh;
+  }
 }
 
-.typing {
-  font-size:12px;
-  color:#aaa;
-  margin-top:5px;
+/* 📱 MOBILE */
+@media (max-width: 768px) {
+
+  body {
+    flex-direction:column;
+  }
+
+  .sidebar {
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px;
+  }
+
+  .main {
+    padding:10px;
+    align-items:stretch;
+  }
+
+  .card {
+    height:calc(100vh - 70px);
+    border-radius:12px;
+  }
+
+  .msg {
+    max-width:90%;
+  }
+
+  input {
+    font-size:16px;
+  }
 }
 </style>
 </head>
@@ -125,15 +176,13 @@ button:hover {
 <div class="sidebar">
   <div class="logo">ReplyFast AI</div>
   <div class="online"><span class="dot"></span>Online</div>
-  <p style="margin-top:20px;color:#aaa;">Dashboard</p>
-  <p style="color:#aaa;">Messages</p>
 </div>
 
 <div class="main">
 
   <div class="card">
-    <h2>AI Assistant</h2>
-    <div class="typing" id="typing"></div>
+
+    <div class="header">AI Chat Dashboard</div>
 
     <div class="chat" id="chat"></div>
 
@@ -141,21 +190,22 @@ button:hover {
       <input id="msg" placeholder="Напиши сообщение...">
       <button onclick="send()">Send</button>
     </div>
+
   </div>
 
 </div>
 
 <script>
-function addMsg(text, type){
-  chat.innerHTML += `<div class="msg ${type}">${text}</div>`;
+function add(text, cls){
+  chat.innerHTML += `<div class="msg ${cls}">${text}</div>`;
   chat.scrollTop = chat.scrollHeight;
 }
 
 async function send(){
   let text = msg.value;
-  addMsg("Ты: " + text, "user");
+  if(!text) return;
 
-  typing.innerText = "AI is typing...";
+  add("Ты: " + text, "user");
 
   let res = await fetch("/ai", {
     method:"POST",
@@ -165,10 +215,9 @@ async function send(){
 
   let data = await res.json();
 
-  setTimeout(()=>{
-    addMsg("AI: " + data.reply, "ai");
-    typing.innerText = "";
-  }, 600);
+  add("AI: " + data.reply, "ai");
+
+  msg.value = "";
 }
 </script>
 
