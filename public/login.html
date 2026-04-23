@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+<style>
+body{font-family:Arial;background:#0b0b0b;color:#fff;text-align:center;padding-top:100px;}
+input,button{padding:12px;width:200px;margin:10px;border:none;border-radius:8px;}
+button{background:#ff2d2d;color:#fff;}
+</style>
+</head>
+<body>
+
+<h2>🔐 Login SaaS</h2>
+
+<input id="name" placeholder="username">
+<br>
+<button onclick="login()">Enter</button>
+
+<script>
+async function login(){
+  const username = name.value;
+
+  const res = await fetch("/login", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ username })
+  });
+
+  const data = await res.json();
+
+  localStorage.setItem("userId", data.userId);
+
+  window.location.href = "/app.html";
+}
+</script>
+
+</body>
+</html>
