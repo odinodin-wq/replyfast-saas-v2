@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ReplyFast AI</title>
+<title>ReplyFast SaaS</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <style>
 body {
@@ -13,10 +15,9 @@ body {
   color:white;
   display:flex;
   height:100vh;
-  overflow:hidden;
 }
 
-/* SIDEBAR */
+/* sidebar */
 .sidebar {
   width:260px;
   background: rgba(255,255,255,0.03);
@@ -25,55 +26,32 @@ body {
 }
 
 .logo {
-  font-size:20px;
-  font-weight:bold;
   color:#ff3b3b;
+  font-size:18px;
+  font-weight:bold;
 }
 
-.online {
-  margin-top:10px;
+.userBox {
+  margin-top:15px;
   font-size:12px;
   color:#aaa;
 }
 
-.dot {
-  width:8px;
-  height:8px;
-  background:lime;
-  border-radius:50%;
-  display:inline-block;
-  margin-right:6px;
-  box-shadow:0 0 10px lime;
-}
-
-/* MAIN */
+/* main */
 .main {
   flex:1;
   padding:20px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
 }
 
 .card {
-  width:100%;
-  max-width:900px;
-  height:85vh;
   background: rgba(255,255,255,0.05);
   border:1px solid rgba(255,255,255,0.08);
   border-radius:16px;
+  height:85vh;
   display:flex;
   flex-direction:column;
-  overflow:hidden;
 }
 
-.header {
-  padding:15px;
-  border-bottom:1px solid rgba(255,255,255,0.08);
-  font-weight:bold;
-}
-
-/* CHAT */
 .chat {
   flex:1;
   overflow:auto;
@@ -81,27 +59,18 @@ body {
 }
 
 .msg {
-  margin:8px 0;
+  margin:6px 0;
   padding:10px;
   border-radius:10px;
-  max-width:75%;
-  word-wrap:break-word;
+  max-width:80%;
 }
 
-.user {
-  background:#ff2d2d;
-  margin-left:auto;
-}
+.user { background:#ff2d2d; margin-left:auto; }
+.ai { background:#222; }
 
-.ai {
-  background:#222;
-}
-
-/* INPUT */
 .inputBox {
   display:flex;
   padding:10px;
-  border-top:1px solid rgba(255,255,255,0.08);
 }
 
 input {
@@ -111,62 +80,16 @@ input {
   border-radius:10px;
   background:#111;
   color:white;
-  font-size:16px;
 }
 
 button {
   margin-left:8px;
-  padding:12px 16px;
+  padding:12px;
   border:none;
   border-radius:10px;
-  background:linear-gradient(135deg,#ff2d2d,#ff6b6b);
+  background:#ff2d2d;
   color:white;
   cursor:pointer;
-}
-
-/* 📟 TABLET */
-@media (max-width: 1024px) {
-  .sidebar {
-    width:200px;
-  }
-
-  .card {
-    height:90vh;
-  }
-}
-
-/* 📱 MOBILE */
-@media (max-width: 768px) {
-
-  body {
-    flex-direction:column;
-  }
-
-  .sidebar {
-    width:100%;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:10px;
-  }
-
-  .main {
-    padding:10px;
-    align-items:stretch;
-  }
-
-  .card {
-    height:calc(100vh - 70px);
-    border-radius:12px;
-  }
-
-  .msg {
-    max-width:90%;
-  }
-
-  input {
-    font-size:16px;
-  }
 }
 </style>
 </head>
@@ -175,14 +98,16 @@ button {
 
 <div class="sidebar">
   <div class="logo">ReplyFast AI</div>
-  <div class="online"><span class="dot"></span>Online</div>
+
+  <div class="userBox" id="userBox">Not logged in</div>
+
+  <button onclick="login()">Login</button>
+  <button onclick="logout()">Logout</button>
 </div>
 
 <div class="main">
 
   <div class="card">
-
-    <div class="header">AI Chat Dashboard</div>
 
     <div class="chat" id="chat"></div>
 
@@ -196,6 +121,38 @@ button {
 </div>
 
 <script>
+const supabase = supabase.createClient(
+  "https://cowsflyfghivkajfauzm.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvd3NmbHlmZ2hpdmthZmphdXptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzY1NjAsImV4cCI6MjA5MjUxMjU2MH0.Z3YWipoU_0ZX2XNWTvp-v0TdMgQ0s6V_r90SHD7Ukx8"
+);
+
+// LOGIN
+async function login() {
+  let email = prompt("Введите email");
+
+  const { error } = await supabase.auth.signInWithOtp({ email });
+
+  alert("Проверь почту 📩");
+}
+
+// LOGOUT
+async function logout() {
+  await supabase.auth.signOut();
+  userBox.innerText = "Not logged in";
+}
+
+// CHECK USER
+async function checkUser() {
+  const { data } = await supabase.auth.getUser();
+
+  if (data.user) {
+    userBox.innerText = "Logged in: " + data.user.email;
+  }
+}
+
+checkUser();
+
+// CHAT
 function add(text, cls){
   chat.innerHTML += `<div class="msg ${cls}">${text}</div>`;
   chat.scrollTop = chat.scrollHeight;
