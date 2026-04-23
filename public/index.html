@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <title>ReplyFast SaaS</title>
@@ -7,64 +7,115 @@
 <style>
 body {
   margin:0;
-  font-family:Arial;
-  background:#0a0a0a;
+  font-family: Inter, Arial;
+  background: radial-gradient(circle at top, #1a0000, #000);
   color:white;
   display:flex;
+  height:100vh;
+  overflow:hidden;
 }
 
 /* sidebar */
 .sidebar {
-  width:220px;
-  background:#111;
-  height:100vh;
+  width:240px;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(20px);
+  border-right:1px solid rgba(255,255,255,0.08);
   padding:20px;
 }
 
-.sidebar h2 {
-  color:#ff4d4d;
+.logo {
+  font-size:20px;
+  font-weight:bold;
+  color:#ff3b3b;
 }
 
+.online {
+  margin-top:10px;
+  font-size:12px;
+  color:#aaa;
+}
+
+.dot {
+  width:8px;
+  height:8px;
+  background:lime;
+  border-radius:50%;
+  display:inline-block;
+  margin-right:6px;
+  box-shadow:0 0 10px lime;
+}
+
+/* main */
 .main {
   flex:1;
-  padding:20px;
+  padding:30px;
 }
 
 .card {
-  background:#151515;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:10px;
+  background: rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;
+  padding:20px;
+  backdrop-filter: blur(20px);
 }
 
 .chat {
-  background:#111;
-  height:300px;
+  margin-top:20px;
+  height:360px;
   overflow:auto;
   padding:10px;
-  border-radius:10px;
 }
 
 .msg {
   margin:8px 0;
+  padding:10px;
+  border-radius:10px;
+  max-width:70%;
 }
 
-.user { color:#ff4d4d; }
-.ai { color:#00ff99; }
+.user {
+  background:#ff2d2d;
+  align-self:flex-end;
+}
+
+.ai {
+  background:#222;
+}
+
+.inputBox {
+  display:flex;
+  margin-top:15px;
+}
 
 input {
-  width:70%;
-  padding:10px;
-  background:#222;
-  color:white;
+  flex:1;
+  padding:12px;
   border:none;
+  border-radius:10px;
+  background:#111;
+  color:white;
 }
 
 button {
-  padding:10px;
-  background:#ff2d2d;
-  color:white;
+  margin-left:10px;
+  padding:12px 18px;
   border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#ff2d2d,#ff6b6b);
+  color:white;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+button:hover {
+  transform:scale(1.05);
+}
+
+.typing {
+  font-size:12px;
+  color:#aaa;
+  margin-top:5px;
 }
 </style>
 </head>
@@ -72,30 +123,39 @@ button {
 <body>
 
 <div class="sidebar">
-  <h2>ReplyFast</h2>
-  <p>📊 Dashboard</p>
-  <p>💬 Chat</p>
-  <p>⚙️ Settings</p>
+  <div class="logo">ReplyFast AI</div>
+  <div class="online"><span class="dot"></span>Online</div>
+  <p style="margin-top:20px;color:#aaa;">Dashboard</p>
+  <p style="color:#aaa;">Messages</p>
 </div>
 
 <div class="main">
 
-  <h2>AI Dashboard</h2>
+  <div class="card">
+    <h2>AI Assistant</h2>
+    <div class="typing" id="typing"></div>
 
-  <div class="card">🟢 AI Online</div>
+    <div class="chat" id="chat"></div>
 
-  <div class="chat" id="chat"></div>
-
-  <input id="msg" placeholder="Напиши клиенту...">
-  <button onclick="send()">Send</button>
+    <div class="inputBox">
+      <input id="msg" placeholder="Напиши сообщение...">
+      <button onclick="send()">Send</button>
+    </div>
+  </div>
 
 </div>
 
 <script>
+function addMsg(text, type){
+  chat.innerHTML += `<div class="msg ${type}">${text}</div>`;
+  chat.scrollTop = chat.scrollHeight;
+}
+
 async function send(){
   let text = msg.value;
+  addMsg("Ты: " + text, "user");
 
-  chat.innerHTML += `<div class="msg user">Ты: ${text}</div>`;
+  typing.innerText = "AI is typing...";
 
   let res = await fetch("/ai", {
     method:"POST",
@@ -105,7 +165,10 @@ async function send(){
 
   let data = await res.json();
 
-  chat.innerHTML += `<div class="msg ai">AI: ${data.reply}</div>`;
+  setTimeout(()=>{
+    addMsg("AI: " + data.reply, "ai");
+    typing.innerText = "";
+  }, 600);
 }
 </script>
 
