@@ -4,90 +4,68 @@ const app = express();
 app.use(express.json());
 app.use(express.static("public"));
 
-/* =========================
-   DATABASE (простая память)
-========================= */
-const db = {};
+// =========================
+// MEMORY DB (MVP)
+// =========================
+const users = {};
 
-/* =========================
-   USER MODEL
-========================= */
-function getUser(id){
-  if(!db[id]){
-    db[id] = {
+// =========================
+// LOGIN / REGISTER
+// =========================
+app.post("/login", (req, res) => {
+  const { username } = req.body;
+
+  if(!users[username]){
+    users[username] = {
       messages: 0,
-      pro: false,
-      memory: []
+      created: Date.now()
     };
   }
-  return db[id];
+
+  res.json({ success: true, userId: username });
+});
+
+// =========================
+// AI
+// =========================
+function ai(msg){
+  const text = msg.toLowerCase();
+
+  if(text.includes("цена")) return "💰 9€/мес — хочешь подключить?";
+  if(text.includes("дорого")) return "Понимаю 👍 но это окупается";
+  if(text.includes("есть")) return "Да 👍 есть";
+  if(text.includes("купить")) return "🔥 оформляем";
+
+  return "Я помогу тебе с клиентами 👍";
 }
 
-/* =========================
-   AI SALES ENGINE
-========================= */
+// =========================
+// CHAT
+// =========================
 app.post("/ai", (req, res) => {
   const { message, userId } = req.body;
 
-  const user = getUser(userId);
+  if(!users[userId]){
+    return res.json({ reply: "User not found" });
+  }
 
-  // 🚫 FREE LIMIT
-  if(!user.pro && user.messages >= 10){
+  const user = users[userId];
+
+  // limit
+  if(user.messages >= 10){
     return res.json({
-      reply: "🚫 Free лимит закончился.\nОбновись до PRO чтобы продолжить 💰"
+      reply: "🚫 Лимит 10 сообщений → скоро PRO версия"
     });
   }
 
   user.messages++;
 
-  const msg = message.toLowerCase();
-  let reply = "";
-
-  // 🔥 SALES LOGIC
-  if(msg.includes("цена")){
-    reply = "🔥 Цена 49€\nОсталось мало, отправка сегодня. Оформляем?";
-  }
-  else if(msg.includes("есть")){
-    reply = "Да 👍 есть в наличии\nНо быстро заканчивается 🔥";
-  }
-  else if(msg.includes("дорого")){
-    reply = "Понимаю 👍\nНо сейчас акция заканчивается сегодня 🔥";
-  }
-  else if(msg.includes("купить") || msg.includes("заказ")){
-    reply = "🔥 Отлично!\nНапиши адрес и телефон — оформим заказ";
-  }
-  else {
-    reply = "Могу помочь 😊 спроси цену или наличие";
-  }
-
-  // 🧠 MEMORY (как у стартапа)
-  user.memory.push({
-    input: message,
-    output: reply
-  });
+  const reply = ai(message);
 
   res.json({ reply });
 });
 
-/* =========================
-   STRIPE WEBHOOK (PRO unlock)
-========================= */
-app.post("/webhook", (req, res) => {
-  const event = req.body;
-
-  if(event.type === "checkout.session.completed"){
-    const userId = event.data.object.metadata.userId;
-
-    const user = getUser(userId);
-    user.pro = true;
-  }
-
-  res.sendStatus(200);
-});
-
-/* =========================
-   START SERVER
-========================= */
+// =========================
 app.listen(3000, () => {
-  console.log("SaaS running 🚀");
+  console.log("LIVE SaaS running 🚀");
 });
