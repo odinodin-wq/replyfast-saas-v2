@@ -3,200 +3,210 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ReplyFast AI</title>
+<title>ReplyFast SaaS</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
 body {
   margin:0;
-  font-family: Inter, Arial;
-  background:#000;
+  font-family: Arial;
+  background:#0b0b0b;
   color:white;
 }
 
-/* HERO */
-.hero {
-  text-align:center;
-  padding:100px 20px;
-  background: radial-gradient(circle at top, #1a0000, #000);
-}
-
-.hero h1 {
-  font-size:42px;
-  color:#ff2d2d;
-}
-
-.hero p {
-  color:#aaa;
-  font-size:18px;
-}
-
-.hero button {
-  margin-top:20px;
-  padding:14px 30px;
-  border:none;
+/* LOGIN */
+#auth {
+  max-width:400px;
+  margin:80px auto;
+  padding:20px;
+  background:#111;
   border-radius:12px;
-  background:linear-gradient(135deg,#ff2d2d,#ff6b6b);
+}
+
+input {
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border:none;
+  border-radius:8px;
+  background:#222;
   color:white;
-  font-size:16px;
+}
+
+button {
+  width:100%;
+  padding:12px;
+  margin-top:8px;
+  border:none;
+  border-radius:8px;
+  background:#ff2d2d;
+  color:white;
   cursor:pointer;
 }
 
-/* SECTION */
-.section {
-  padding:60px 20px;
-  text-align:center;
-}
-
-.cards {
-  display:flex;
-  gap:20px;
-  justify-content:center;
-  flex-wrap:wrap;
-}
-
-.card {
-  background:#111;
+/* APP */
+#app {
+  display:none;
   padding:20px;
-  border-radius:12px;
-  width:250px;
 }
 
-/* DEMO */
-.demo {
-  max-width:600px;
-  margin:auto;
-}
-
-.chat {
+.topbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
   background:#111;
-  border-radius:12px;
-  padding:15px;
-  height:300px;
+  border-radius:10px;
+}
+
+.online {
+  color:#aaa;
+  font-size:14px;
+}
+
+.dot {
+  width:10px;
+  height:10px;
+  background:#00ff88;
+  border-radius:50%;
+  display:inline-block;
+  margin-right:5px;
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {transform:scale(1);}
+  50% {transform:scale(1.5);}
+  100% {transform:scale(1);}
+}
+
+/* CHAT */
+.chat {
+  margin-top:20px;
+  background:#111;
+  border-radius:10px;
+  padding:10px;
+  height:400px;
   overflow:auto;
 }
 
 .msg {
-  margin:6px 0;
   padding:10px;
-  border-radius:10px;
+  margin:6px 0;
+  border-radius:8px;
 }
 
-.user { background:#ff2d2d; }
-.ai { background:#222; }
+.user {background:#ff2d2d;}
+.ai {background:#222;}
 
 .inputBox {
   display:flex;
   margin-top:10px;
 }
 
-input {
+.inputBox input {
   flex:1;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:#222;
-  color:white;
 }
 
-button.send {
-  margin-left:8px;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:#ff2d2d;
-  color:white;
-}
-
-/* PRICING */
-.pricing {
-  display:flex;
-  justify-content:center;
-  gap:20px;
-  flex-wrap:wrap;
-}
-
-.plan {
-  background:#111;
-  padding:25px;
-  border-radius:12px;
-  width:250px;
-}
-
-.plan h3 {
-  color:#ff2d2d;
-}
-
-.plan button {
-  margin-top:10px;
-  padding:10px;
-  width:100%;
-  background:#ff2d2d;
-  border:none;
-  border-radius:10px;
-  color:white;
-}
-
-/* MOBILE */
-@media (max-width:768px){
-  .hero h1 { font-size:28px; }
+.inputBox button {
+  width:120px;
+  margin-left:10px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- HERO -->
-<div class="hero">
-  <h1>AI отвечает клиентам за тебя</h1>
-  <p>Автоответы для Instagram продавцов 24/7</p>
-  <button onclick="scrollToDemo()">Попробовать</button>
+<!-- LOGIN -->
+<div id="auth">
+  <h2>ReplyFast Login</h2>
+
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+
+  <button onclick="signUp()">Sign Up</button>
+  <button onclick="signIn()">Login</button>
+
+  <p id="status"></p>
 </div>
 
-<!-- FEATURES -->
-<div class="section">
-  <h2>Что умеет</h2>
-  <div class="cards">
-    <div class="card">Отвечает на вопросы клиентов</div>
-    <div class="card">Работает 24/7</div>
-    <div class="card">Увеличивает продажи</div>
+<!-- APP -->
+<div id="app">
+
+  <div class="topbar">
+    <div>🔥 ReplyFast SaaS</div>
+    <div class="online"><span class="dot"></span>AI online</div>
+    <button onclick="logout()">Logout</button>
   </div>
-</div>
-
-<!-- DEMO -->
-<div class="section demo" id="demo">
-  <h2>Попробуй прямо сейчас</h2>
 
   <div class="chat" id="chat"></div>
 
   <div class="inputBox">
-    <input id="msg" placeholder="Например: есть в наличии?">
-    <button class="send" onclick="send()">Send</button>
+    <input id="msg" placeholder="Напиши клиентский вопрос...">
+    <button onclick="send()">Send</button>
   </div>
-</div>
 
-<!-- PRICING -->
-<div class="section">
-  <h2>Тарифы</h2>
-
-  <div class="pricing">
-    <div class="plan">
-      <h3>Free</h3>
-      <p>10 сообщений</p>
-      <button>Начать</button>
-    </div>
-
-    <div class="plan">
-      <h3>PRO</h3>
-      <p>Без лимита</p>
-      <button onclick="buy()">Купить</button>
-    </div>
-  </div>
 </div>
 
 <script>
-function scrollToDemo() {
-  document.getElementById("demo").scrollIntoView({behavior:"smooth"});
+/* =========================
+   🔑 SUPABASE CONFIG
+   ========================= */
+
+// ✔ URL У ТЕБЯ ПРАВИЛЬНЫЙ:
+const SUPABASE_URL = "https://cowsflyfghivkafjauzm.supabase.co";
+
+// ❗ ВСТАВЬ СЮДА СВОЙ ANON KEY (из Supabase → API)
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvd3NmbHlmZ2hpdmthZmphdXptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzY1NjAsImV4cCI6MjA5MjUxMjU2MH0.Z3YWipoU_0ZX2XNWTvp-v0TdMgQ0s6V_r90SHD7Ukx8";
+
+const supabase = supabase_js.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+let user = null;
+
+/* =========================
+   🔐 AUTH
+   ========================= */
+
+async function signUp(){
+  let { data, error } = await supabase.auth.signUp({
+    email: email.value,
+    password: password.value
+  });
+
+  status.innerText = error ? error.message : "Check email 📩";
 }
+
+async function signIn(){
+  let { data, error } = await supabase.auth.signInWithPassword({
+    email: email.value,
+    password: password.value
+  });
+
+  if(error){
+    status.innerText = error.message;
+  } else {
+    user = data.user;
+    startApp();
+  }
+}
+
+function startApp(){
+  document.getElementById("auth").style.display = "none";
+  document.getElementById("app").style.display = "block";
+}
+
+async function logout(){
+  await supabase.auth.signOut();
+  location.reload();
+}
+
+/* =========================
+   💬 CHAT
+   ========================= */
 
 function add(text, cls){
   chat.innerHTML += `<div class="msg ${cls}">${text}</div>`;
@@ -212,7 +222,10 @@ async function send(){
   let res = await fetch("/ai", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({message:text})
+    body:JSON.stringify({
+      message:text,
+      userId:user.id
+    })
   });
 
   let data = await res.json();
@@ -220,10 +233,6 @@ async function send(){
   add("AI: " + data.reply, "ai");
 
   msg.value = "";
-}
-
-function buy(){
-  alert("Подключи Stripe позже 💳");
 }
 </script>
 
