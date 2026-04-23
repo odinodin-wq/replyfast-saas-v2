@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ReplyFast SaaS</title>
+
+<style>
+body {
+  margin:0;
+  font-family:Arial;
+  background:#0a0a0a;
+  color:white;
+  display:flex;
+}
+
+/* sidebar */
+.sidebar {
+  width:220px;
+  background:#111;
+  height:100vh;
+  padding:20px;
+}
+
+.sidebar h2 {
+  color:#ff4d4d;
+}
+
+.main {
+  flex:1;
+  padding:20px;
+}
+
+.card {
+  background:#151515;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:10px;
+}
+
+.chat {
+  background:#111;
+  height:300px;
+  overflow:auto;
+  padding:10px;
+  border-radius:10px;
+}
+
+.msg {
+  margin:8px 0;
+}
+
+.user { color:#ff4d4d; }
+.ai { color:#00ff99; }
+
+input {
+  width:70%;
+  padding:10px;
+  background:#222;
+  color:white;
+  border:none;
+}
+
+button {
+  padding:10px;
+  background:#ff2d2d;
+  color:white;
+  border:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>ReplyFast</h2>
+  <p>📊 Dashboard</p>
+  <p>💬 Chat</p>
+  <p>⚙️ Settings</p>
+</div>
+
+<div class="main">
+
+  <h2>AI Dashboard</h2>
+
+  <div class="card">🟢 AI Online</div>
+
+  <div class="chat" id="chat"></div>
+
+  <input id="msg" placeholder="Напиши клиенту...">
+  <button onclick="send()">Send</button>
+
+</div>
+
+<script>
+async function send(){
+  let text = msg.value;
+
+  chat.innerHTML += `<div class="msg user">Ты: ${text}</div>`;
+
+  let res = await fetch("/ai", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({message:text})
+  });
+
+  let data = await res.json();
+
+  chat.innerHTML += `<div class="msg ai">AI: ${data.reply}</div>`;
+}
+</script>
+
+</body>
+</html>
