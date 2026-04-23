@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ReplyFast SaaS</title>
+<title>AI SaaS Assistant</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -15,85 +15,62 @@ body {
   color:white;
 }
 
-/* LOGIN */
 #auth {
   max-width:400px;
-  margin:80px auto;
+  margin:60px auto;
   padding:20px;
   background:#111;
   border-radius:12px;
 }
 
-input {
-  width:100%;
-  padding:12px;
-  margin:8px 0;
-  border:none;
-  border-radius:8px;
-  background:#222;
-  color:white;
-}
-
-button {
+input, button {
   width:100%;
   padding:12px;
   margin-top:8px;
   border:none;
   border-radius:8px;
+}
+
+input {
+  background:#222;
+  color:white;
+}
+
+button {
   background:#ff2d2d;
   color:white;
   cursor:pointer;
 }
 
-/* APP */
 #app {
   display:none;
-  padding:20px;
+  padding:15px;
 }
 
-.topbar {
+.top {
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  padding:10px;
   background:#111;
+  padding:10px;
   border-radius:10px;
 }
 
 .online {
-  color:#aaa;
-  font-size:14px;
+  color:#00ff88;
 }
 
-.dot {
-  width:10px;
-  height:10px;
-  background:#00ff88;
-  border-radius:50%;
-  display:inline-block;
-  margin-right:5px;
-  animation:pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% {transform:scale(1);}
-  50% {transform:scale(1.5);}
-  100% {transform:scale(1);}
-}
-
-/* CHAT */
 .chat {
-  margin-top:20px;
+  margin-top:15px;
   background:#111;
-  border-radius:10px;
-  padding:10px;
-  height:400px;
+  height:350px;
   overflow:auto;
+  padding:10px;
+  border-radius:10px;
 }
 
 .msg {
-  padding:10px;
-  margin:6px 0;
+  padding:8px;
+  margin:5px 0;
   border-radius:8px;
 }
 
@@ -113,6 +90,13 @@ button {
   width:120px;
   margin-left:10px;
 }
+
+.tariffs {
+  margin-top:20px;
+  background:#111;
+  padding:10px;
+  border-radius:10px;
+}
 </style>
 </head>
 
@@ -120,7 +104,7 @@ button {
 
 <!-- LOGIN -->
 <div id="auth">
-  <h2>ReplyFast Login</h2>
+  <h2>AI SaaS Login</h2>
 
   <input id="email" placeholder="Email">
   <input id="password" type="password" placeholder="Password">
@@ -134,45 +118,47 @@ button {
 <!-- APP -->
 <div id="app">
 
-  <div class="topbar">
-    <div>🔥 ReplyFast SaaS</div>
-    <div class="online"><span class="dot"></span>AI online</div>
+  <div class="top">
+    <div>🔥 AI Sales Bot</div>
+    <div class="online">● online</div>
     <button onclick="logout()">Logout</button>
   </div>
 
   <div class="chat" id="chat"></div>
 
   <div class="inputBox">
-    <input id="msg" placeholder="Напиши клиентский вопрос...">
+    <input id="msg" placeholder="Напиши клиентский запрос...">
     <button onclick="send()">Send</button>
+  </div>
+
+  <div class="tariffs">
+    <h3>Тарифы</h3>
+
+    <p>Free — 10 сообщений</p>
+    <button>Начать</button>
+
+    <p style="margin-top:10px;">PRO — без лимита</p>
+    <button>Купить</button>
   </div>
 
 </div>
 
 <script>
-/* =========================
-   🔑 SUPABASE CONFIG
-   ========================= */
 
-// ✔ URL У ТЕБЯ ПРАВИЛЬНЫЙ:
+// 🔑 SUPABASE
 const SUPABASE_URL = "https://cowsflyfghivkafjauzm.supabase.co";
-
-// ❗ ВСТАВЬ СЮДА СВОЙ ANON KEY (из Supabase → API)
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvd3NmbHlmZ2hpdmthZmphdXptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzY1NjAsImV4cCI6MjA5MjUxMjU2MH0.Z3YWipoU_0ZX2XNWTvp-v0TdMgQ0s6V_r90SHD7Ukx8";
 
-const supabase = supabase_js.createClient(
+const supabase = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
 
 let user = null;
 
-/* =========================
-   🔐 AUTH
-   ========================= */
-
+// 🔐 SIGN UP
 async function signUp(){
-  let { data, error } = await supabase.auth.signUp({
+  let { error } = await supabase.auth.signUp({
     email: email.value,
     password: password.value
   });
@@ -180,6 +166,7 @@ async function signUp(){
   status.innerText = error ? error.message : "Check email 📩";
 }
 
+// 🔐 LOGIN
 async function signIn(){
   let { data, error } = await supabase.auth.signInWithPassword({
     email: email.value,
@@ -190,29 +177,22 @@ async function signIn(){
     status.innerText = error.message;
   } else {
     user = data.user;
-    startApp();
+    start();
   }
 }
 
-function startApp(){
-  document.getElementById("auth").style.display = "none";
-  document.getElementById("app").style.display = "block";
+function start(){
+  auth.style.display = "none";
+  app.style.display = "block";
 }
 
-async function logout(){
-  await supabase.auth.signOut();
-  location.reload();
-}
-
-/* =========================
-   💬 CHAT
-   ========================= */
-
+// 💬 CHAT UI
 function add(text, cls){
   chat.innerHTML += `<div class="msg ${cls}">${text}</div>`;
   chat.scrollTop = chat.scrollHeight;
 }
 
+// 🤖 AI LOGIC
 async function send(){
   let text = msg.value;
   if(!text) return;
@@ -234,6 +214,13 @@ async function send(){
 
   msg.value = "";
 }
+
+// 🚪 LOGOUT
+async function logout(){
+  await supabase.auth.signOut();
+  location.reload();
+}
+
 </script>
 
 </body>
