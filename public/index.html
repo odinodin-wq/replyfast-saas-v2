@@ -3,74 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ReplyFast SaaS</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<title>ReplyFast AI</title>
 
 <style>
 body {
   margin:0;
-  font-family: Arial;
-  background: radial-gradient(circle at top, #1a0000, #000);
+  font-family: Inter, Arial;
+  background:#000;
   color:white;
-  display:flex;
-  height:100vh;
 }
 
-/* sidebar */
-.sidebar {
-  width:260px;
-  background: rgba(255,255,255,0.03);
-  border-right:1px solid rgba(255,255,255,0.08);
-  padding:20px;
+/* HERO */
+.hero {
+  text-align:center;
+  padding:100px 20px;
+  background: radial-gradient(circle at top, #1a0000, #000);
 }
 
-.logo {
-  color:#ff3b3b;
-  font-size:18px;
-  font-weight:bold;
+.hero h1 {
+  font-size:42px;
+  color:#ff2d2d;
 }
 
-.userBox {
-  margin-top:15px;
-  font-size:12px;
+.hero p {
   color:#aaa;
+  font-size:18px;
 }
 
-/* main */
-.main {
-  flex:1;
-  padding:20px;
+.hero button {
+  margin-top:20px;
+  padding:14px 30px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(135deg,#ff2d2d,#ff6b6b);
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+
+/* SECTION */
+.section {
+  padding:60px 20px;
+  text-align:center;
+}
+
+.cards {
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  flex-wrap:wrap;
 }
 
 .card {
-  background: rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:16px;
-  height:85vh;
-  display:flex;
-  flex-direction:column;
+  background:#111;
+  padding:20px;
+  border-radius:12px;
+  width:250px;
+}
+
+/* DEMO */
+.demo {
+  max-width:600px;
+  margin:auto;
 }
 
 .chat {
-  flex:1;
-  overflow:auto;
+  background:#111;
+  border-radius:12px;
   padding:15px;
+  height:300px;
+  overflow:auto;
 }
 
 .msg {
   margin:6px 0;
   padding:10px;
   border-radius:10px;
-  max-width:80%;
 }
 
-.user { background:#ff2d2d; margin-left:auto; }
+.user { background:#ff2d2d; }
 .ai { background:#222; }
 
 .inputBox {
   display:flex;
-  padding:10px;
+  margin-top:10px;
 }
 
 input {
@@ -78,81 +94,110 @@ input {
   padding:12px;
   border:none;
   border-radius:10px;
-  background:#111;
+  background:#222;
   color:white;
 }
 
-button {
+button.send {
   margin-left:8px;
   padding:12px;
   border:none;
   border-radius:10px;
   background:#ff2d2d;
   color:white;
-  cursor:pointer;
+}
+
+/* PRICING */
+.pricing {
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.plan {
+  background:#111;
+  padding:25px;
+  border-radius:12px;
+  width:250px;
+}
+
+.plan h3 {
+  color:#ff2d2d;
+}
+
+.plan button {
+  margin-top:10px;
+  padding:10px;
+  width:100%;
+  background:#ff2d2d;
+  border:none;
+  border-radius:10px;
+  color:white;
+}
+
+/* MOBILE */
+@media (max-width:768px){
+  .hero h1 { font-size:28px; }
 }
 </style>
 </head>
 
 <body>
 
-<div class="sidebar">
-  <div class="logo">ReplyFast AI</div>
-
-  <div class="userBox" id="userBox">Not logged in</div>
-
-  <button onclick="login()">Login</button>
-  <button onclick="logout()">Logout</button>
+<!-- HERO -->
+<div class="hero">
+  <h1>AI отвечает клиентам за тебя</h1>
+  <p>Автоответы для Instagram продавцов 24/7</p>
+  <button onclick="scrollToDemo()">Попробовать</button>
 </div>
 
-<div class="main">
+<!-- FEATURES -->
+<div class="section">
+  <h2>Что умеет</h2>
+  <div class="cards">
+    <div class="card">Отвечает на вопросы клиентов</div>
+    <div class="card">Работает 24/7</div>
+    <div class="card">Увеличивает продажи</div>
+  </div>
+</div>
 
-  <div class="card">
+<!-- DEMO -->
+<div class="section demo" id="demo">
+  <h2>Попробуй прямо сейчас</h2>
 
-    <div class="chat" id="chat"></div>
+  <div class="chat" id="chat"></div>
 
-    <div class="inputBox">
-      <input id="msg" placeholder="Напиши сообщение...">
-      <button onclick="send()">Send</button>
+  <div class="inputBox">
+    <input id="msg" placeholder="Например: есть в наличии?">
+    <button class="send" onclick="send()">Send</button>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="section">
+  <h2>Тарифы</h2>
+
+  <div class="pricing">
+    <div class="plan">
+      <h3>Free</h3>
+      <p>10 сообщений</p>
+      <button>Начать</button>
     </div>
 
+    <div class="plan">
+      <h3>PRO</h3>
+      <p>Без лимита</p>
+      <button onclick="buy()">Купить</button>
+    </div>
   </div>
-
 </div>
 
 <script>
-const supabase = supabase.createClient(
-  "https://cowsflyfghivkajfauzm.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvd3NmbHlmZ2hpdmthZmphdXptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzY1NjAsImV4cCI6MjA5MjUxMjU2MH0.Z3YWipoU_0ZX2XNWTvp-v0TdMgQ0s6V_r90SHD7Ukx8"
-);
-
-// LOGIN
-async function login() {
-  let email = prompt("Введите email");
-
-  const { error } = await supabase.auth.signInWithOtp({ email });
-
-  alert("Проверь почту 📩");
+function scrollToDemo() {
+  document.getElementById("demo").scrollIntoView({behavior:"smooth"});
 }
 
-// LOGOUT
-async function logout() {
-  await supabase.auth.signOut();
-  userBox.innerText = "Not logged in";
-}
-
-// CHECK USER
-async function checkUser() {
-  const { data } = await supabase.auth.getUser();
-
-  if (data.user) {
-    userBox.innerText = "Logged in: " + data.user.email;
-  }
-}
-
-checkUser();
-
-// CHAT
 function add(text, cls){
   chat.innerHTML += `<div class="msg ${cls}">${text}</div>`;
   chat.scrollTop = chat.scrollHeight;
@@ -175,6 +220,10 @@ async function send(){
   add("AI: " + data.reply, "ai");
 
   msg.value = "";
+}
+
+function buy(){
+  alert("Подключи Stripe позже 💳");
 }
 </script>
 
