@@ -3,222 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI SaaS Assistant</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>AI Sales SaaS</title>
 
 <style>
-body {
-  margin:0;
-  font-family: Arial;
-  background:#0b0b0b;
-  color:white;
-}
-
-#auth {
-  max-width:400px;
-  margin:60px auto;
-  padding:20px;
-  background:#111;
-  border-radius:12px;
-}
-
-input, button {
-  width:100%;
-  padding:12px;
-  margin-top:8px;
-  border:none;
-  border-radius:8px;
-}
-
-input {
-  background:#222;
-  color:white;
-}
-
-button {
-  background:#ff2d2d;
-  color:white;
-  cursor:pointer;
-}
-
-#app {
-  display:none;
-  padding:15px;
-}
-
-.top {
-  display:flex;
-  justify-content:space-between;
-  background:#111;
-  padding:10px;
-  border-radius:10px;
-}
-
-.online {
-  color:#00ff88;
-}
-
-.chat {
-  margin-top:15px;
-  background:#111;
-  height:350px;
-  overflow:auto;
-  padding:10px;
-  border-radius:10px;
-}
-
-.msg {
-  padding:8px;
-  margin:5px 0;
-  border-radius:8px;
-}
-
-.user {background:#ff2d2d;}
-.ai {background:#222;}
-
-.inputBox {
-  display:flex;
-  margin-top:10px;
-}
-
-.inputBox input {
-  flex:1;
-}
-
-.inputBox button {
-  width:120px;
-  margin-left:10px;
-}
-
-.tariffs {
-  margin-top:20px;
-  background:#111;
-  padding:10px;
-  border-radius:10px;
-}
+body {font-family:Arial;background:#0b0b0b;color:#fff;margin:0;padding:0;}
+.container {max-width:600px;margin:auto;padding:20px;}
+input,button{width:100%;padding:12px;margin-top:10px;border-radius:8px;border:none;}
+input{background:#222;color:#fff;}
+button{background:#ff2d2d;color:#fff;cursor:pointer;}
+.chat{height:300px;overflow:auto;background:#111;padding:10px;border-radius:10px;margin-top:10px;}
+.msg{padding:8px;margin:5px 0;border-radius:6px;}
+.user{background:#ff2d2d;}
+.ai{background:#222;}
+.top{display:flex;justify-content:space-between;align-items:center;}
+.online{color:#00ff88;}
+.pay{margin-top:15px;background:#222;padding:10px;border-radius:10px;}
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="auth">
-  <h2>AI SaaS Login</h2>
-
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-
-  <button onclick="signUp()">Sign Up</button>
-  <button onclick="signIn()">Login</button>
-
-  <p id="status"></p>
-</div>
-
-<!-- APP -->
-<div id="app">
+<div class="container">
 
   <div class="top">
-    <div>🔥 AI Sales Bot</div>
+    <h2>AI Sales Assistant</h2>
     <div class="online">● online</div>
-    <button onclick="logout()">Logout</button>
   </div>
 
   <div class="chat" id="chat"></div>
 
-  <div class="inputBox">
-    <input id="msg" placeholder="Напиши клиентский запрос...">
-    <button onclick="send()">Send</button>
-  </div>
+  <input id="msg" placeholder="Напиши клиентский запрос">
+  <button onclick="send()">Send</button>
 
-  <div class="tariffs">
-    <h3>Тарифы</h3>
+  <div class="pay">
+    <h3>PRO версия</h3>
+    <p>Без лимита + AI продавец</p>
 
-    <p>Free — 10 сообщений</p>
-    <button>Начать</button>
-
-    <p style="margin-top:10px;">PRO — без лимита</p>
-    <button>Купить</button>
+    <button onclick="buy()">💰 Upgrade PRO</button>
   </div>
 
 </div>
 
 <script>
 
-// 🔑 SUPABASE
-const SUPABASE_URL = "https://cowsflyfghivkafjauzm.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvd3NmbHlmZ2hpdmthZmphdXptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzY1NjAsImV4cCI6MjA5MjUxMjU2MH0.Z3YWipoU_0ZX2XNWTvp-v0TdMgQ0s6V_r90SHD7Ukx8";
+const userId = localStorage.getItem("uid") || crypto.randomUUID();
+localStorage.setItem("uid", userId);
 
-const supabase = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
-
-let user = null;
-
-// 🔐 SIGN UP
-async function signUp(){
-  let { error } = await supabase.auth.signUp({
-    email: email.value,
-    password: password.value
-  });
-
-  status.innerText = error ? error.message : "Check email 📩";
-}
-
-// 🔐 LOGIN
-async function signIn(){
-  let { data, error } = await supabase.auth.signInWithPassword({
-    email: email.value,
-    password: password.value
-  });
-
-  if(error){
-    status.innerText = error.message;
-  } else {
-    user = data.user;
-    start();
-  }
-}
-
-function start(){
-  auth.style.display = "none";
-  app.style.display = "block";
-}
-
-// 💬 CHAT UI
 function add(text, cls){
   chat.innerHTML += `<div class="msg ${cls}">${text}</div>`;
   chat.scrollTop = chat.scrollHeight;
 }
 
-// 🤖 AI LOGIC
 async function send(){
-  let text = msg.value;
+  const text = msg.value;
   if(!text) return;
 
   add("Ты: " + text, "user");
 
-  let res = await fetch("/ai", {
+  const res = await fetch("/ai", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
+    body: JSON.stringify({
       message:text,
-      userId:user.id
+      userId
     })
   });
 
-  let data = await res.json();
-
+  const data = await res.json();
   add("AI: " + data.reply, "ai");
 
   msg.value = "";
 }
 
-// 🚪 LOGOUT
-async function logout(){
-  await supabase.auth.signOut();
-  location.reload();
+function buy(){
+  window.location.href = "https://checkout.stripe.com/pay/YOUR_LINK";
 }
 
 </script>
